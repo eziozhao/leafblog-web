@@ -51,7 +51,7 @@ export const constantRoutes = [
       path: 'dashboard',
       name: 'Dashboard',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: 'Dashboard', icon: 'dashboard' }
+      meta: { title: '首页', icon: 'dashboard' }
     }]
   }
 ]
@@ -69,28 +69,35 @@ export const asyncRoutes = [
     meta: { title: '文章管理', icon: 'product' },
     children: [{
       path: 'list',
-      name: 'list',
+      name: 'List',
       component: () => import('@/views/article/index'),
       meta: { title: '文章列表', icon: 'product-list' }
     },
     {
       path: 'publish',
-      name: 'publish',
+      name: 'Publish',
       component: () => import('@/views/article/publish'),
       meta: { title: '发表文章', icon: 'product-add' }
     },
     {
       path: 'category',
-      name: 'category',
+      name: 'Category',
       component: () => import('@/views/article/category'),
       meta: { title: '分类列表', icon: 'product-add' }
     },
     {
-      path: 'productCate',
-      name: 'productCate',
+      path: 'bin',
+      name: 'Bin',
       component: () => import('@/views/article/bin'),
       meta: { title: '回收站', icon: 'product-cate' }
-    }
+    },
+    {
+      path: 'detail/:id(\\d+)',
+      name: 'ArticleDetail',
+      component: () => import('@/views/article/ArticleDetail'),
+      meta: { title: '文章详情', icon: 'product-cate', noCache: true, activeMenu: '/article/list' },
+      hidden: true
+    },
     ]
   },
   // 404 page must be placed at the end !!!

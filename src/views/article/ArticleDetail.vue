@@ -1,11 +1,11 @@
 <template>
-  <div>article_cate</div>
 
 </template>
+
 <script>
-export default {
-  name: 'Category'
-}
+    export default {
+        name: "ArticleDetail"
+    }
 </script>
 
 <style scoped>

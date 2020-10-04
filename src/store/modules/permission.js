@@ -5,33 +5,47 @@ import { asyncRoutes, constantRoutes } from '@/router'
  * @param roles
  * @param route
  */
-function hasPermission(roles, route) {
-  if (route.meta && route.meta.roles) {
-    return roles.some(role => route.meta.roles.includes(role))
+// 判断是否有权限访问该菜单
+function hasPermission(menus, route) {
+  if (route.name) {
+    const currMenu = getMenu(route.name, menus)
+    if (currMenu != null) {
+      // 设置菜单的标题、图标和可见性
+      if (currMenu.title != null && currMenu.title !== '') {
+        route.meta.title = currMenu.title
+      }
+      if (currMenu.icon != null && currMenu.title !== '') {
+        route.meta.icon = currMenu.icon
+      }
+      if (currMenu.hidden != null) {
+        route.hidden = currMenu.hidden !== 0
+      }
+      if (currMenu.sort != null && currMenu.sort !== '') {
+        route.sort = currMenu.sort
+      }
+      return true
+    } else {
+      route.sort = 0
+      if (route.hidden !== undefined && route.hidden === true) {
+        return true
+      } else {
+        return false
+      }
+    }
   } else {
     return true
   }
 }
 
-/**
- * Filter asynchronous routing tables by recursion
- * @param routes asyncRoutes
- * @param roles
- */
-export function filterAsyncRoutes(routes, roles) {
-  const res = []
-
-  routes.forEach(route => {
-    const tmp = { ...route }
-    if (hasPermission(roles, tmp)) {
-      if (tmp.children) {
-        tmp.children = filterAsyncRoutes(tmp.children, roles)
-      }
-      res.push(tmp)
+// 根据路由名称获取菜单
+function getMenu(name, menus) {
+  for (let i = 0; i < menus.length; i++) {
+    const menu = menus[i]
+    if (name === menu.name) {
+      return menu
     }
-  })
-
-  return res
+  }
+  return null
 }
 
 const state = {
@@ -47,16 +61,29 @@ const mutations = {
 }
 
 const actions = {
-  generateRoutes({ commit }, roles) {
+  generateRoutes({ commit }, data) {
     return new Promise(resolve => {
-      let accessedRoutes
-      if (roles.includes('admin')) {
-        accessedRoutes = asyncRoutes || []
-      } else {
-        accessedRoutes = filterAsyncRoutes(asyncRoutes, roles)
-      }
-      commit('SET_ROUTES', accessedRoutes)
-      resolve(accessedRoutes)
+      const { menus } = data
+      const { username } = data
+      const accessedRouters = asyncRoutes.filter(v => {
+        if (username === 'admin') return true
+        if (hasPermission(menus, v)) {
+          if (v.children && v.children.length > 0) {
+            v.children = v.children.filter(child => {
+              if (hasPermission(menus, child)) {
+                return child
+              }
+              return false
+            })
+            return v
+          } else {
+            return v
+          }
+        }
+        return false
+      })
+      commit('SET_ROUTES', accessedRouters)
+      resolve()
     })
   }
 }

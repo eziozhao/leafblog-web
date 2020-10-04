@@ -4,7 +4,7 @@ import { Message } from 'element-ui'
 import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css' // progress bar style
 import { getToken } from '@/utils/auth' // get token from cookie
-import getPageTitle from '@/utils/get-page-title'
+
 const whiteList = ['/login'] // 不重定向白名单
 router.beforeEach((to, from, next) => {
   NProgress.start()
@@ -17,12 +17,12 @@ router.beforeEach((to, from, next) => {
         store.dispatch('user/getInfo').then(res => { // 拉取用户信息
           const menus = res.data.menus
           const username = res.data.username
-          store.dispatch('GenerateRoutes', { menus, username }).then(() => { // 生成可访问的路由表
-            router.addRoutes(store.getters.addRouters) // 动态添加可访问路由表
+          store.dispatch('permission/generateRoutes', { menus, username }).then(() => { // 生成可访问的路由表
+            router.addRoutes(store.getters.addRoutes) // 动态添加可访问路由表
             next({ ...to, replace: true })
           })
         }).catch((err) => {
-          store.dispatch('FedLogOut').then(() => {
+          store.dispatch('user/fedLogOut').then(() => {
             Message.error(err || 'Verification failed, please login again')
             next({ path: '/' })
           })

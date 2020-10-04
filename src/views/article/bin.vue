@@ -1,5 +1,6 @@
-<template />
-
+<template>
+  <div>bin</div>
+</template>
 <script>
 export default {
   name: 'Bin'
