@@ -65,7 +65,7 @@ export const asyncRoutes = [
     path: '/article',
     component: Layout,
     redirect: '/article/list',
-    name: 'article',
+    name: 'Article',
     meta: { title: '文章管理', icon: 'product' },
     children: [{
       path: 'list',
@@ -97,7 +97,7 @@ export const asyncRoutes = [
       component: () => import('@/views/article/ArticleDetail'),
       meta: { title: '文章详情', icon: 'product-cate', noCache: true, activeMenu: '/article/list' },
       hidden: true
-    },
+    }
     ]
   },
   // 404 page must be placed at the end !!!

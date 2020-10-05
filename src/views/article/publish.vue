@@ -1,26 +1,225 @@
 <template>
-  <div class="components-container">
-    <div class="editor-container">
-      <markdown-editor v-model="content" height="600px" />
-    </div>
+  <div class="createPost-container">
+    <el-form ref="postForm" :model="postForm" :rules="rules" class="form-container">
+      <sticky :z-index="10" :class-name="'sub-navbar '+postForm.status">
+        <el-button v-loading="loading" style="margin-left: 10px;" type="success" @click="submitForm">
+          Publish
+        </el-button>
+        <el-button v-loading="loading" type="warning" @click="draftForm">
+          Draft
+        </el-button>
+      </sticky>
+
+      <div class="createPost-main-container">
+        <el-row>
+          <el-col :span="24">
+            <el-form-item style="margin-bottom: 40px;" prop="title">
+              <MDinput v-model="postForm.title" :maxlength="100" name="name" required>
+                Title
+              </MDinput>
+            </el-form-item>
+
+            <div class="postInfo-container">
+              <el-row>
+                <el-col :span="8">
+                  <el-form-item label-width="60px" label="分类:" class="postInfo-container-item">
+                    <el-select
+                      v-model="postForm.category"
+                      :remote-method="fetchCateList"
+                      filterable
+                      placeholder="请输入关键词"
+                      default-first-option
+                      remote
+                    >
+                      <el-option v-for="(item,index) in categoryList" :key="item+index" :label="item.catename" :value="item.id" />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                  <el-form-item label-width="60px" label="标签:" class="postInfo-container-item">
+                    <el-tag
+                      v-for="tag in postForm.dynamicTags"
+                      :key="tag"
+                      closable
+                      :disable-transitions="false"
+                      @close="handleClose(tag)"
+                    >
+                      {{ tag }}
+                    </el-tag>
+                    <el-input
+                      v-if="inputVisible"
+                      ref="saveTagInput"
+                      v-model="inputValue"
+                      class="input-new-tag"
+                      size="small"
+                      @keyup.enter.native="handleInputConfirm"
+                      @blur="handleInputConfirm"
+                    />
+                    <el-button v-else class="button-new-tag" size="small" @click="showInput">+ New Tag</el-button>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+            </div>
+          </el-col>
+        </el-row>
+        <el-form-item prop="content" style="margin-bottom: 30px;">
+          <markdown-editor v-model="postForm.content" height="600px" />
+        </el-form-item>
+      </div>
+    </el-form>
   </div>
 </template>
 
 <script>
+import Sticky from '@/components/Sticky'
 import MarkdownEditor from '@/components/MarkdownEditor'
+import MDinput from '@/components/MDinput'
+import { add } from '@/api/article'
+import { fetchList } from '@/api/category'
+
 export default {
   name: 'Publish',
-  components: { MarkdownEditor },
+  components: { MarkdownEditor, Sticky, MDinput },
   data() {
+    const validateRequire = (rule, value, callback) => {
+      if (value === '') {
+        this.$message({
+          message: rule.field + '为必传项',
+          type: 'error'
+        })
+        callback(new Error(rule.field + '为必传项'))
+      } else {
+        callback()
+      }
+    }
     return {
-      content: '开始编辑'
+      loading: false,
+      categoryList: [],
+      postForm: {
+        content: '',
+        category: '',
+        title: '',
+        status: 'draft',
+        dynamicTags: []
+      },
+      rules: {
+        title: [{ validator: validateRequire }],
+        content: [{ validator: validateRequire }],
+        category: [{ validator: validateRequire }]
+      },
+      inputVisible: false,
+      inputValue: ''
+    }
+  },
+  methods: {
+    submitForm() {
+      this.$refs.postForm.validate(valid => {
+        if (valid) {
+          this.loading = true
+          const article = {
+            title: this.postForm.title,
+            state: 1,
+            mdcontent: this.postForm.content
+          }
+          const tags = this.postForm.dynamicTags
+          const categoryId = this.postForm.category
+          const params = {
+            article: article,
+            tags: tags,
+            categoryId: categoryId
+          }
+          add(params).then(res => {
+            this.$notify({
+              title: '成功',
+              message: '发布文章成功',
+              type: 'success',
+              duration: 2000
+            })
+          })
+          this.postForm.status = 'published'
+          this.loading = false
+        } else {
+          return false
+        }
+      })
+    },
+    draftForm() {
+      if (this.postForm.content.length === 0 || this.postForm.title.length === 0) {
+        this.$message({
+          message: '请填写必要的标题和内容',
+          type: 'warning'
+        })
+        return
+      }
+      this.$message({
+        message: '保存成功',
+        type: 'success',
+        showClose: true,
+        duration: 1000
+      })
+      this.postForm.status = 'draft'
+    },
+    fetchCateList() {
+      fetchList().then(res => {
+        this.categoryList = res.data
+      })
+    },
+    handleClose(tag) {
+      this.postForm.dynamicTags.splice(this.postForm.dynamicTags.indexOf(tag), 1)
+    },
+    showInput() {
+      this.inputVisible = true
+      this.$nextTick(_ => {
+        this.$refs.saveTagInput.$refs.input.focus()
+      })
+    },
+
+    handleInputConfirm() {
+      const inputValue = this.inputValue
+      if (inputValue) {
+        this.postForm.dynamicTags.push(inputValue)
+      }
+      this.inputVisible = false
+      this.inputValue = ''
     }
   }
 }
 </script>
 
-<style scoped>
-  .editor-container{
-    margin-bottom: 30px;
+<style lang="scss" scoped>
+  @import "~@/styles/mixin.scss";
+
+  .createPost-container {
+    position: relative;
+
+    .createPost-main-container {
+      padding: 40px 45px 20px 50px;
+
+      .postInfo-container {
+        position: relative;
+        @include clearfix;
+        margin-bottom: 10px;
+
+        .postInfo-container-item {
+          float: left;
+        }
+      }
+    }
   }
+  .el-tag + .el-tag {
+    margin-left: 10px;
+  }
+  .button-new-tag {
+    margin-left: 10px;
+    height: 32px;
+    line-height: 30px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .input-new-tag {
+    width: 90px;
+    margin-left: 10px;
+    vertical-align: bottom;
+  }
+
 </style>

@@ -21,7 +21,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column min-width="300px" label="Title">
+      <el-table-column min-width="300px" label="标题">
         <template slot-scope="{row}">
           <router-link :to="'/article/detail/'+row.id" class="link-type">
             <span>{{ row.title }}</span>
@@ -29,13 +29,16 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="Actions" width="120">
+      <el-table-column align="center" label="操作">
         <template slot-scope="scope">
           <router-link :to="'/article/edit/'+scope.row.id">
             <el-button type="primary" size="small" icon="el-icon-edit">
-              Edit
+              编辑
             </el-button>
           </router-link>
+          <el-button style="margin-left: 10px" type="danger" size="small" icon="el-icon-delete" @click="handleDelete(scope.row.id)">
+            删除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -52,7 +55,7 @@
 
 <script>
 import { formatDate } from '@/utils'
-import { fetchList } from '@/api/article'
+import { fetchList, deleteArticle } from '@/api/article'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 export default {
@@ -98,6 +101,14 @@ export default {
         this.total = response.data.total
         this.listLoading = false
       })
+    },
+    handleDelete(id) {
+      const ids = []
+      ids.push(id)
+      const params = new URLSearchParams()
+      params.append('aids', ids)
+      params.append('state', 2)
+      deleteArticle(params)
     }
   }
 }
