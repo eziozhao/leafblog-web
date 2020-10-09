@@ -71,7 +71,7 @@ export const asyncRoutes = [
       path: 'list',
       name: 'List',
       component: () => import('@/views/article/index'),
-      meta: { title: '文章列表', icon: 'product-list' }
+      meta: { title: '文章列表', icon: 'product-list', noCache: false }
     },
     {
       path: 'publish',

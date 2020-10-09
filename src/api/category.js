@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-export function fetchList(data) {
+export function fetchList() {
   return request({
     url: '/category/list',
     method: 'get'
@@ -16,9 +16,9 @@ export function add(data) {
 
 export function deleteCate(data) {
   return request({
-    url: '/category/add',
+    url: '/category/delete',
     method: 'delete',
-    data: data
+    params: data
   })
 }
 export function update(data) {
