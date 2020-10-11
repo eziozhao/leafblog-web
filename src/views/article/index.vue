@@ -1,15 +1,19 @@
 <template>
   <div class="app-container">
     <el-table v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%">
-      <el-table-column align="center" label="ID" width="80">
-        <template slot-scope="scope">
-          <span>{{ scope.row.id }}</span>
-        </template>
-      </el-table-column>
+      <el-table-column
+        type="index"
+        width="50"
+      />
 
       <el-table-column width="180px" align="center" label="编辑日期">
         <template slot-scope="scope">
           <span>{{ scope.row.edittime | formatCreateTime }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column width="180px" align="center" label="发布日期">
+        <template slot-scope="scope">
+          <span>{{ scope.row.publishdate | formatCreateTime }}</span>
         </template>
       </el-table-column>
 
@@ -81,7 +85,7 @@ export default {
       listLoading: true,
       listQuery: {
         pageNum: 1,
-        pageSize: 5,
+        pageSize: 10,
         keywords: null
       },
       stateMap: {
@@ -96,9 +100,9 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      fetchList(this.listQuery).then(response => {
-        this.list = response.data.list
-        this.total = response.data.total
+      fetchList(this.listQuery).then(res => {
+        this.list = res.data.list
+        this.total = res.data.total
         this.listLoading = false
       })
     },
@@ -108,7 +112,9 @@ export default {
       const params = new URLSearchParams()
       params.append('aids', ids)
       params.append('state', 2)
-      deleteArticle(params)
+      deleteArticle(params).then(() => {
+        this.$message.success('删除成功')
+      })
     }
   }
 }

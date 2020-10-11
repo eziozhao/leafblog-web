@@ -5,7 +5,7 @@
         <el-input v-model="newCate" placeholder="输入新的分类名" />
       </el-col>
       <el-col :span="6">
-        <el-button type="primary" @click="handleAdd">添加分类</el-button>
+        <el-button type="primary" icon="el-icon-circle-plus-outline" @click="handleAdd">添加分类</el-button>
       </el-col>
     </el-row>
     <el-table v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%">
@@ -31,13 +31,7 @@
           <el-button type="primary" size="small" icon="el-icon-edit" @click="handleEdit(scope.row.id)">
             编辑
           </el-button>
-          <el-button
-            style="margin-left: 10px"
-            type="danger"
-            size="small"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row.id)"
-          >
+          <el-button style="margin-left: 10px" type="danger" size="small" icon="el-icon-delete" @click="handleDelete(scope.row.id)">
             删除
           </el-button>
         </template>

@@ -38,3 +38,10 @@ export function fetchById(id) {
   })
 }
 
+export function recover(data) {
+  return request({
+    url: '/article/recover',
+    method: 'post',
+    params: data
+  })
+}
