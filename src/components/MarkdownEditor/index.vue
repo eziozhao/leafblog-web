@@ -90,9 +90,19 @@ export default {
       if (this.value) {
         this.editor.setMarkdown(this.value)
       }
+      this.editor.eventManager.removeEventHandler('addImageBlobHook')
       this.editor.on('change', () => {
         this.$emit('input', this.editor.getMarkdown())
       })
+      this.editor.eventManager.listen('addImageBlobHook', (blob, callback) => {
+        // 此处填写自己的上传逻辑，url为上传后的图片地址
+        this.uploadImage(blob, url => {
+          callback(url)
+        })
+      })
+    },
+    uploadImage(file, callback) {
+      // 上传逻辑
     },
     destroyEditor() {
       if (!this.editor) return
