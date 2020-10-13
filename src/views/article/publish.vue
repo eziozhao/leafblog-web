@@ -2,12 +2,15 @@
   <div class="createPost-container">
     <el-form ref="postForm" :model="postForm" :rules="rules" class="form-container">
       <sticky :z-index="10" :class-name="'sub-navbar '+postForm.status">
-        <el-button v-loading="loading" style="margin-left: 10px;" type="success" @click="submitForm">
-          Publish
-        </el-button>
-        <el-button v-loading="loading" type="warning" @click="draftForm">
-          Draft
-        </el-button>
+        <el-row v-if="articleId===null">
+          <el-button v-loading="loading" style="margin-left: 10px;" type="success" @click="submitForm">
+            发表
+          </el-button>
+          <el-button v-loading="loading" type="warning" @click="draftForm">
+            保存到草稿
+          </el-button>
+        </el-row>
+        <el-button v-else v-loading="loading" type="success" @click="updateForm">更新</el-button>
       </sticky>
 
       <div class="createPost-main-container">
@@ -25,13 +28,9 @@
                   <el-form-item label-width="60px" label="分类:" class="postInfo-container-item">
                     <el-select
                       v-model="postForm.category"
-                      :remote-method="fetchCateList"
-                      filterable
                       placeholder="请输入关键词"
-                      default-first-option
-                      remote
                     >
-                      <el-option v-for="(item,index) in categoryList" :key="item+index" :label="item.catename" :value="item.id" />
+                      <el-option v-for="(item,index) in categoryList" :key="index" :label="item.catename" :value="item.id" />
                     </el-select>
                   </el-form-item>
                 </el-col>
@@ -74,7 +73,7 @@
 import Sticky from '@/components/Sticky'
 import MarkdownEditor from '@/components/MarkdownEditor'
 import MDinput from '@/components/MDinput'
-import { add } from '@/api/article'
+import { add, fetchById, update } from '@/api/article'
 import { fetchList } from '@/api/category'
 
 export default {
@@ -95,6 +94,7 @@ export default {
     return {
       loading: false,
       categoryList: [],
+      articleId: null,
       postForm: {
         content: '',
         category: '',
@@ -109,6 +109,20 @@ export default {
       },
       inputVisible: false,
       inputValue: ''
+    }
+  },
+  watch() {
+
+  },
+  created() {
+    this.articleId = this.$route.params.id
+    this.fetchCateList()
+    if (this.articleId !== undefined) {
+      fetchById(this.articleId).then(res => {
+        this.postForm.category = res.data.cid
+        this.postForm.title = res.data.title
+        this.postForm.content = res.data.mdcontent
+      })
     }
   },
   methods: {
@@ -128,7 +142,7 @@ export default {
             tags: tags,
             categoryId: categoryId
           }
-          add(params).then(res => {
+          add(params).then(() => {
             this.$notify({
               title: '成功',
               message: '发布文章成功',
@@ -144,20 +158,66 @@ export default {
       })
     },
     draftForm() {
-      if (this.postForm.content.length === 0 || this.postForm.title.length === 0) {
-        this.$message({
-          message: '请填写必要的标题和内容',
-          type: 'warning'
-        })
-        return
-      }
-      this.$message({
-        message: '保存成功',
-        type: 'success',
-        showClose: true,
-        duration: 1000
+      this.$refs.postForm.validate(valid => {
+        if (valid) {
+          this.loading = true
+          const article = {
+            title: this.postForm.title,
+            state: 0,
+            mdcontent: this.postForm.content
+          }
+          const tags = this.postForm.dynamicTags
+          const categoryId = this.postForm.category
+          const params = {
+            article: article,
+            tags: tags,
+            categoryId: categoryId
+          }
+          add(params).then(() => {
+            this.$notify({
+              title: '成功',
+              message: '保存草稿成功',
+              type: 'success',
+              duration: 2000
+            })
+          })
+          this.postForm.status = 'draft'
+          this.loading = false
+        } else {
+          return false
+        }
       })
-      this.postForm.status = 'draft'
+    },
+    updateForm() {
+      this.$refs.postForm.validate(valid => {
+        if (valid) {
+          this.loading = true
+          const article = {
+            title: this.postForm.title,
+            state: 0,
+            mdcontent: this.postForm.content
+          }
+          const tags = this.postForm.dynamicTags
+          const categoryId = this.postForm.category
+          const params = {
+            article: article,
+            tags: tags,
+            categoryId: categoryId
+          }
+          update(params).then(() => {
+            this.$notify({
+              title: '成功',
+              message: '更新成功',
+              type: 'success',
+              duration: 2000
+            })
+          })
+          this.postForm.status = 'draft'
+          this.loading = false
+        } else {
+          return false
+        }
+      })
     },
     fetchCateList() {
       fetchList().then(res => {

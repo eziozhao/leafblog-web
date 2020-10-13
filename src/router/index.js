@@ -71,7 +71,7 @@ export const asyncRoutes = [
       path: 'list',
       name: 'List',
       component: () => import('@/views/article/index'),
-      meta: { title: '文章列表', icon: 'product-list', noCache: false }
+      meta: { title: '文章列表', icon: 'product-list'}
     },
     {
       path: 'publish',
@@ -95,7 +95,14 @@ export const asyncRoutes = [
       path: 'detail/:id(\\d+)',
       name: 'ArticleDetail',
       component: () => import('@/views/article/ArticleDetail'),
-      meta: { title: '文章详情', icon: 'product-cate', noCache: true, activeMenu: '/article/list' },
+      meta: { title: '文章详情', icon: 'product-cate', activeMenu: '/article/list' },
+      hidden: true
+    },
+    {
+      path: 'edit/:id(\\d+)',
+      name: 'Publish',
+      component: () => import('@/views/article/publish'),
+      meta: { title: '修改文章', icon: 'product-cate', activeMenu: '/article/list' },
       hidden: true
     }
     ]
