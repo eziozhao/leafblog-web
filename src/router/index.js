@@ -100,6 +100,33 @@ export const asyncRoutes = [
     }
     ]
   },
+  {
+    path: '/auth',
+    component: Layout,
+    redirect: '/auth/user',
+    name: 'Auth',
+    meta: { title: '权限管理', icon: 'product' },
+    children: [
+      {
+        path: 'user',
+        name: 'User',
+        component: () => import('@/views/auth/user'),
+        meta: { title: '用户管理', icon: 'product-list' }
+      },
+      {
+        path: 'role',
+        name: 'Role',
+        component: () => import('@/views/auth/role'),
+        meta: { title: '角色管理', icon: 'product-list' }
+      },
+      {
+        path: 'resource',
+        name: 'Resource',
+        component: () => import('@/views/auth/resource'),
+        meta: { title: '资源管理', icon: 'product-list' }
+      }
+    ]
+  },
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
 ]
