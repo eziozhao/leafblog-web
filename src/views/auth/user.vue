@@ -16,6 +16,9 @@
           <span>{{ scope.row.nickname }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="邮箱" align="center">
+        <template slot-scope="scope">{{ scope.row.email }}</template>
+      </el-table-column>
       <el-table-column align="center" label="创建时间">
         <template slot-scope="scope">
           <span>{{ scope.row.regTime | formatCreateTime }}</span>
@@ -24,30 +27,28 @@
       <el-table-column label="是否启用" width="140" align="center">
         <template slot-scope="scope">
           <el-switch
-            v-model="scope.row.status"
+            v-model="scope.row.enabled"
             :active-value="1"
             :inactive-value="0"
             @change="handleStatusChange(scope.$index, scope.row)"
           />
         </template>
       </el-table-column>
-
-      <el-table-column label="标题">
-        <template slot-scope="{row}">
-          <router-link :to="'/article/detail/'+row.id" class="link-type">
-            <span>{{ row.title }}</span>
-          </router-link>
-        </template>
-      </el-table-column>
-
       <el-table-column align="center" label="操作">
         <template slot-scope="scope">
-          <router-link :to="'/article/edit/'+scope.row.id">
-            <el-button type="primary" size="small" icon="el-icon-edit">
-              编辑
-            </el-button>
-          </router-link>
-          <el-button style="margin-left: 10px" type="danger" size="small" icon="el-icon-delete" @click="handleDelete(scope.row.id)">
+          <el-button type="success" size="small" icon="el-icon-user">
+            分配角色
+          </el-button>
+          <el-button type="primary" size="small" icon="el-icon-edit">
+            编辑
+          </el-button>
+          <el-button
+            style="margin-left: 10px"
+            type="danger"
+            size="small"
+            icon="el-icon-delete"
+            @click="handleDelete(scope.row.id)"
+          >
             删除
           </el-button>
         </template>
@@ -68,11 +69,11 @@
 import { formatDate } from '@/utils'
 import Pagination from '@/components/Pagination'
 import { fetchList } from '@/api/admin'
+
 export default {
   name: 'User',
   components: { Pagination },
   filters: {
-
     formatCreateTime(time) {
       const date = new Date(time)
       return formatDate(date, 'yyyy-MM-dd hh:mm:ss')
@@ -90,6 +91,9 @@ export default {
       }
     }
   },
+  mounted() {
+    this.getList()
+  },
   methods: {
     getList() {
       this.listLoading = true
@@ -99,7 +103,11 @@ export default {
         this.listLoading = false
       })
     },
-    handleStatusChange() {}
+    handleStatusChange() {
+    },
+      handleDelete(id){
+
+      }
   }
 }
 </script>
