@@ -4,6 +4,8 @@
       <el-table-column
         type="index"
         width="50"
+        label="编号"
+        align="center"
       />
 
       <el-table-column width="180px" align="center" label="编辑日期">

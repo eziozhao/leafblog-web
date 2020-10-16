@@ -10,7 +10,7 @@
     >
 
       <div class="title-container">
-        <h3 class="title">Login Form</h3>
+        <h3 class="title">LeafBLog</h3>
       </div>
 
       <el-form-item prop="username">
