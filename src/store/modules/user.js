@@ -6,7 +6,6 @@ const getDefaultState = () => {
   return {
     token: getToken(),
     name: '',
-    avatar: '',
     roles: []
   }
 }
