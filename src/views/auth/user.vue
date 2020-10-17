@@ -1,5 +1,14 @@
 <template>
   <div class="app-container">
+    <el-row :gutter="20" style="margin-bottom: 10px">
+      <el-col :span="6">
+        <el-input v-model="listQuery.keyword" placeholder="输入用户名搜索" />
+      </el-col>
+      <el-col :span="6">
+        <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
+        <el-button type="primary" icon="el-icon-plus" @click="handleAdd">添加</el-button>
+      </el-col>
+    </el-row>
     <el-table v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%">
       <el-table-column
         type="index"
@@ -36,10 +45,10 @@
       </el-table-column>
       <el-table-column align="center" label="操作">
         <template slot-scope="scope">
-          <el-button type="success" size="small" icon="el-icon-user">
+          <el-button type="success" size="small" icon="el-icon-user" @click="handleAllocRole(scope.row)">
             分配角色
           </el-button>
-          <el-button type="primary" size="small" icon="el-icon-edit">
+          <el-button type="primary" size="small" icon="el-icon-edit" @click="handleUpdateUser(scope.row)">
             编辑
           </el-button>
           <el-button
@@ -58,18 +67,89 @@
     <pagination
       v-show="total>0"
       :total="total"
-      :page.sync="listQuery.page"
-      :limit.sync="listQuery.limit"
+      :page.sync="listQuery.pageNum"
+      :limit.sync="listQuery.pageSize"
       @pagination="getList"
     />
+    <el-dialog
+      :title="isEdit?'编辑用户':'添加用户'"
+      :visible.sync="dialogVisible"
+      width="40%"
+    >
+      <el-form
+        ref="userForm"
+        :model="user"
+        label-width="150px"
+        size="small"
+        :rules="rules"
+      >
+        <el-form-item label="帐号：" prop="username">
+          <el-input v-model="user.username" style="width: 250px" />
+        </el-form-item>
+        <el-form-item label="昵称：" prop="nickname">
+          <el-input v-model="user.nickname" style="width: 250px" />
+        </el-form-item>
+        <el-form-item label="邮箱：" prop="email">
+          <el-input v-model="user.email" style="width: 250px" />
+        </el-form-item>
+        <el-form-item label="密码：" prop="password">
+          <el-input v-model="user.password" type="password" style="width: 250px" />
+        </el-form-item>
+        <el-form-item label="是否启用：">
+          <el-radio-group v-model="user.enabled">
+            <el-radio :label="1">是</el-radio>
+            <el-radio :label="0">否</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" size="small" @click="handleDialogConfirm">确 定</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog
+      title="分配角色"
+      :visible.sync="allocDialogVisible"
+      width="30%"
+    >
+      <el-select v-model="allocRoleIds" multiple placeholder="请选择" size="small" style="width: 80%">
+        <el-option
+          v-for="item in allRoleList"
+          :key="item.id"
+          :label="item.name"
+          :value="item.id"
+        />
+      </el-select>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="allocDialogVisible = false">取 消</el-button>
+        <el-button type="primary" size="small" @click="handleAllocDialogConfirm()">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { formatDate } from '@/utils'
 import Pagination from '@/components/Pagination'
-import { fetchList, changeStatus, deleteUser, updateUserRole, allocMenu, allocResource } from '@/api/admin'
+import { register } from '@/api/user'
+import {
+  fetchList,
+  changeStatus,
+  deleteUser,
+  updateUserRole,
+  allocMenu,
+  allocResource,
+  updateUser
+} from '@/api/admin'
 
+const defaultUser = {
+  id: null,
+  username: null,
+  password: null,
+  nickname: null,
+  email: null,
+  enabled: 1
+}
 export default {
   name: 'User',
   components: { Pagination },
@@ -80,6 +160,14 @@ export default {
     }
   },
   data() {
+    const checkEmail = (rule, value, callback) => {
+      const reg = /^\w+((.\w+)|(-\w+))@[A-Za-z0-9]+((.|-)[A-Za-z0-9]+).[A-Za-z0-9]+$/
+      if (!value || reg.test(value)) {
+        callback()
+      } else {
+        callback(new Error('邮箱格式错误'))
+      }
+    }
     return {
       list: null,
       total: 0,
@@ -87,8 +175,20 @@ export default {
       listQuery: {
         pageNum: 1,
         pageSize: 10,
-        keywords: null
-      }
+        keyword: null
+      },
+      dialogVisible: false,
+      user: Object.assign({}, defaultUser),
+      isEdit: false,
+      rules: {
+        username: [{ required: true, message: '请输入帐号', trigger: 'blur' }],
+        email: [{ message: '邮箱格式错误', trigger: 'blur', validator: checkEmail }],
+        password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+      },
+      allocDialogVisible: false,
+      allocRoleIds: [],
+      allRoleList: [],
+      allocAdminId: null
     }
   },
   mounted() {
@@ -103,6 +203,15 @@ export default {
         this.listLoading = false
       })
     },
+    handleSearch() {
+      this.listQuery.pageNum = 1
+      this.getList()
+    },
+    handleAdd() {
+      this.dialogVisible = true
+      this.isEdit = false
+      this.user = Object.assign({}, defaultUser)
+    },
     handleStatusChange(row) {
       const params = {
         userId: row.id,
@@ -114,6 +223,34 @@ export default {
     },
     handleDelete(id) {
 
+    },
+    handleAllocRole() {
+    },
+    handleUpdateUser(row) {
+      this.dialogVisible = true
+      this.isEdit = true
+      this.user = Object.assign({}, row)
+    },
+    handleDialogConfirm() {
+      this.$refs['userForm'].validate((valid) => {
+        if (valid) {
+          if (this.isEdit) {
+            updateUser(this.user).then(() => {
+              this.$message.success('更新用户成功')
+              this.dialogVisible = false
+              this.getList()
+            })
+          } else {
+            register(this.user).then(() => {
+              this.$message.success('添加用户成功')
+              this.dialogVisible = false
+              this.getList()
+            })
+          }
+        } else {
+          return false
+        }
+      })
     }
   }
 }

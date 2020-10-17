@@ -43,3 +43,10 @@ export function allocResource(data) {
     params: data
   })
 }
+export function updateUser(data) {
+  return request({
+    url: '/admin/update',
+    method: 'put',
+    data: data
+  })
+}
