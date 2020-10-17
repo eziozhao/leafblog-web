@@ -21,7 +21,7 @@
       </el-table-column>
       <el-table-column align="center" label="创建时间">
         <template slot-scope="scope">
-          <span>{{ scope.row.regTime | formatCreateTime }}</span>
+          <span>{{ scope.row.regtime | formatCreateTime }}</span>
         </template>
       </el-table-column>
       <el-table-column label="是否启用" width="140" align="center">
@@ -30,7 +30,7 @@
             v-model="scope.row.enabled"
             :active-value="1"
             :inactive-value="0"
-            @change="handleStatusChange(scope.$index, scope.row)"
+            @change="handleStatusChange(scope.row)"
           />
         </template>
       </el-table-column>
@@ -68,7 +68,7 @@
 <script>
 import { formatDate } from '@/utils'
 import Pagination from '@/components/Pagination'
-import { fetchList } from '@/api/admin'
+import { fetchList, changeStatus, deleteUser, updateUserRole, allocMenu, allocResource } from '@/api/admin'
 
 export default {
   name: 'User',
@@ -103,11 +103,18 @@ export default {
         this.listLoading = false
       })
     },
-    handleStatusChange() {
-    },
-      handleDelete(id){
-
+    handleStatusChange(row) {
+      const params = {
+        userId: row.id,
+        enable: row.enabled
       }
+      changeStatus(params).then(() => {
+        this.$message.success('修改用户状态成功')
+      })
+    },
+    handleDelete(id) {
+
+    }
   }
 }
 </script>
