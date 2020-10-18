@@ -14,8 +14,9 @@
         type="index"
         width="50"
         label="编号"
+        align="center
       />
-      <el-table-column align="center" label="登录名">
+      <el-table-column align="center" label="用户名">
         <template slot-scope="scope">
           <span>{{ scope.row.username }}</span>
         </template>
@@ -83,7 +84,7 @@
         size="small"
         :rules="rules"
       >
-        <el-form-item label="帐号：" prop="username">
+        <el-form-item label="用户名：" prop="username">
           <el-input v-model="user.username" style="width: 250px" />
         </el-form-item>
         <el-form-item label="昵称：" prop="nickname">
@@ -133,15 +134,7 @@ import { formatDate } from '@/utils'
 import Pagination from '@/components/Pagination'
 import { register } from '@/api/user'
 import { fetchByUserId, fetchRoleList } from '@/api/role'
-import {
-  fetchList,
-  changeStatus,
-  deleteUser,
-  allocRole,
-  allocMenu,
-  allocResource,
-  updateUser
-} from '@/api/admin'
+import { allocRole, changeStatus, deleteUser, fetchList, updateUser } from '@/api/admin'
 
 const defaultUser = {
   id: null,
@@ -236,7 +229,10 @@ export default {
       })
     },
     handleDelete(id) {
-
+      deleteUser({ userId: id }).then(() => {
+        this.$message.success('删除用户成功')
+        this.getList()
+      })
     },
     handleAllocRole(id) {
       this.allocDialogVisible = true
