@@ -21,9 +21,9 @@ export function deleteUser(data) {
     params: data
   })
 }
-export function updateUserRole(data) {
+export function allocRole(data) {
   return request({
-    url: '/admin/role/update',
+    url: '/admin/user/allocRole',
     method: 'post',
     params: data
   })

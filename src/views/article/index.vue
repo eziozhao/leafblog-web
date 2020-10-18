@@ -116,6 +116,7 @@ export default {
       params.append('state', 2)
       deleteArticle(params).then(() => {
         this.$message.success('删除成功')
+        this.getList()
       })
     }
   }

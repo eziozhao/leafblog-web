@@ -93,12 +93,14 @@ export default {
         params.append('state', 3)
         deleteArticle(params).then(() => {
           this.$message.success('删除成功')
+          this.getList()
         })
       })
     },
     handleRecover(id) {
       recover({ id: id }).then(() => {
         this.$message.success('恢复成功')
+        this.getList()
       })
     }
   }

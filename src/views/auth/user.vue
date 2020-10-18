@@ -45,7 +45,7 @@
       </el-table-column>
       <el-table-column align="center" label="操作">
         <template slot-scope="scope">
-          <el-button type="success" size="small" icon="el-icon-user" @click="handleAllocRole(scope.row)">
+          <el-button type="success" size="small" icon="el-icon-user" @click="handleAllocRole(scope.row.id)">
             分配角色
           </el-button>
           <el-button type="primary" size="small" icon="el-icon-edit" @click="handleUpdateUser(scope.row)">
@@ -132,11 +132,12 @@
 import { formatDate } from '@/utils'
 import Pagination from '@/components/Pagination'
 import { register } from '@/api/user'
+import { fetchByUserId, fetchRoleList } from '@/api/role'
 import {
   fetchList,
   changeStatus,
   deleteUser,
-  updateUserRole,
+  allocRole,
   allocMenu,
   allocResource,
   updateUser
@@ -188,11 +189,12 @@ export default {
       allocDialogVisible: false,
       allocRoleIds: [],
       allRoleList: [],
-      allocAdminId: null
+      userId: null
     }
   },
-  mounted() {
+  created() {
     this.getList()
+    this.getRoles()
   },
   methods: {
     getList() {
@@ -201,6 +203,18 @@ export default {
         this.list = res.data.list
         this.total = res.data.total
         this.listLoading = false
+      })
+    },
+    getRoles() {
+      fetchRoleList().then(res => {
+        this.allRoleList = res.data
+      })
+    },
+    fetchUserRole(id) {
+      fetchByUserId({ userId: id }).then(res => {
+        this.allocRoleIds = []
+        const roles = res.data
+        roles.forEach(el => this.allocRoleIds.push(el.id))
       })
     },
     handleSearch() {
@@ -224,7 +238,10 @@ export default {
     handleDelete(id) {
 
     },
-    handleAllocRole() {
+    handleAllocRole(id) {
+      this.allocDialogVisible = true
+      this.userId = id
+      this.fetchUserRole(id)
     },
     handleUpdateUser(row) {
       this.dialogVisible = true
@@ -250,6 +267,15 @@ export default {
         } else {
           return false
         }
+      })
+    },
+    handleAllocDialogConfirm() {
+      const params = new URLSearchParams()
+      params.append('userId', this.userId)
+      params.append('roleIds', this.allocRoleIds)
+      allocRole(params).then(() => {
+        this.$message.success('角色分配成功')
+        this.allocDialogVisible = false
       })
     }
   }
