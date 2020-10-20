@@ -39,3 +39,10 @@ export function deleteRole(data) {
   })
 }
 
+export function fetchRoleMenu(data) {
+  return request({
+    url: 'role/menuList',
+    method: 'get',
+    params: data
+  })
+}

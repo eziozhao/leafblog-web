@@ -86,13 +86,45 @@
         <el-button type="primary" size="small" @click="handleDialogConfirm">确 定</el-button>
       </span>
     </el-dialog>
+    <el-dialog
+      title="分配菜单"
+      :visible.sync="menuDialogVisible"
+      width="40%"
+    >
+      <el-card v-loading="menuLoading" shadow="never">
+        <el-tree
+          ref="tree"
+          :data="menuTreeList"
+          show-checkbox
+          default-expand-all
+          node-key="id"
+          highlight-current
+          :props="defaultProps"
+        />
+        <div style="margin-top: 20px" align="center">
+          <el-button type="primary" @click="handleMenuSave()">保存</el-button>
+          <el-button @click="handleMenuClear()">清空</el-button>
+        </div>
+
+      </el-card>
+    </el-dialog>
+    <el-dialog
+      title="分配资源"
+      :visible.sync="resourceDialogVisible"
+      width="40%"
+    >
+      123
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import Pagination from '@/components/Pagination/index'
 import { formatDate } from '@/utils'
-import { fetchRoleList, updateRole, addRole, deleteRole } from '@/api/role'
+import { fetchRoleList, updateRole, addRole, deleteRole, fetchRoleMenu } from '@/api/role'
+import { allocMenu, allocResource } from '@/api/admin'
+import { fetchMenuTree } from '@/api/menu'
+
 const defaultRole = {
   id: null,
   name: null,
@@ -117,14 +149,24 @@ export default {
         pageSize: 10,
         keyword: null
       },
+      menuTreeList: [],
+      defaultProps: {
+        children: 'children',
+        label: 'title'
+      },
+      roleId: null,
       role: Object.assign({}, defaultRole),
       dialogVisible: false,
+      menuDialogVisible: false,
+      resourceDialogVisible:false,
+      menuLoading: true,
       isEdit: false,
       rules: { name: [{ required: true, message: '请输入角色名', trigger: 'blur' }] }
     }
   },
   created() {
     this.getList()
+    this.getTreeList()
   },
   methods: {
     getList() {
@@ -143,7 +185,12 @@ export default {
       this.isEdit = false
       this.role = Object.assign({}, defaultRole)
     },
-    handleAllocMenu(id) {},
+    handleAllocMenu(id) {
+      this.menuDialogVisible = true
+      this.menuLoading = true
+      this.roleId = id
+      this.getRoleMenu(id)
+    },
     handleAllocResource(id) {},
     handleUpdate(role) {
       this.dialogVisible = true
@@ -176,6 +223,56 @@ export default {
           return false
         }
       })
+    },
+    getTreeList() {
+      fetchMenuTree().then(res => {
+        this.menuTreeList = res.data
+      })
+    },
+    getRoleMenu(roleId) {
+      fetchRoleMenu({ roleId: roleId }).then(res => {
+        const menuList = res.data
+        const checkedMenuIds = []
+        if (menuList != null && menuList.length > 0) {
+          menuList.forEach(menu => {
+            menu.parentId !== 0 ? checkedMenuIds.push(menu.id) : ''
+          })
+        }
+        this.$refs.tree.setCheckedKeys(checkedMenuIds)
+        this.menuLoading = false
+      })
+    },
+    handleMenuSave() {
+      const checkedNodes = this.$refs.tree.getCheckedNodes()
+      const checkedMenuIds = new Set()
+      if (checkedNodes != null && checkedNodes.length > 0) {
+        checkedNodes.forEach(checkedNode => {
+          checkedMenuIds.add(checkedNode.id)
+          if (checkedNode.parentId !== 0) {
+            checkedMenuIds.add(checkedNode.parentId)
+          }
+        })
+      }
+      this.$confirm('是否分配菜单？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        const params = new URLSearchParams()
+        params.append('roleId', this.roleId)
+        params.append('menuIds', Array.from(checkedMenuIds))
+        allocMenu(params).then(res => {
+          this.$message({
+            message: '分配成功',
+            type: 'success',
+            duration: 1000
+          })
+          this.menuDialogVisible = false
+        })
+      })
+    },
+    handleMenuClear() {
+      this.$refs.tree.setCheckedKeys([])
     }
   }
 }

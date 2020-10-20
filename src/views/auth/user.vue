@@ -14,7 +14,7 @@
         type="index"
         width="50"
         label="编号"
-        align="center
+        align="center"
       />
       <el-table-column align="center" label="用户名">
         <template slot-scope="scope">
