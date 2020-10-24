@@ -113,7 +113,17 @@
       :visible.sync="resourceDialogVisible"
       width="40%"
     >
-      123
+      <el-card v-loading="resourceLoading" shadow="never">
+        <el-checkbox v-model="checkAll" :indeterminate="isIndeterminate" @change="handleCheckAllChange">全选</el-checkbox>
+        <div style="margin: 15px 0;" />
+        <el-checkbox-group v-model="checkedResources" @change="handleCheckedResourcesChange">
+          <el-checkbox v-for="item in resourceOptions" :key="item.id" :label="item.id">{{ item.name }}</el-checkbox>
+        </el-checkbox-group>
+        <div style="margin-top: 20px" align="center">
+          <el-button type="primary" @click="handleResourceSave">保存</el-button>
+          <el-button @click="handleResourceClear">清空</el-button>
+        </div>
+      </el-card>
     </el-dialog>
   </div>
 </template>
@@ -121,10 +131,10 @@
 <script>
 import Pagination from '@/components/Pagination/index'
 import { formatDate } from '@/utils'
-import { fetchRoleList, updateRole, addRole, deleteRole, fetchRoleMenu } from '@/api/role'
+import { fetchRoleList, updateRole, addRole, deleteRole, fetchRoleMenu, fetchRoleResource } from '@/api/role'
 import { allocMenu, allocResource } from '@/api/admin'
 import { fetchMenuTree } from '@/api/menu'
-
+import { fetchList } from '@/api/resource'
 const defaultRole = {
   id: null,
   name: null,
@@ -146,7 +156,7 @@ export default {
       listLoading: true,
       listQuery: {
         pageNum: 1,
-        pageSize: 10,
+        pageSize: 5,
         keyword: null
       },
       menuTreeList: [],
@@ -158,15 +168,22 @@ export default {
       role: Object.assign({}, defaultRole),
       dialogVisible: false,
       menuDialogVisible: false,
-      resourceDialogVisible:false,
+      resourceDialogVisible: false,
       menuLoading: true,
+      resourceLoading: true,
       isEdit: false,
-      rules: { name: [{ required: true, message: '请输入角色名', trigger: 'blur' }] }
+      rules: { name: [{ required: true, message: '请输入角色名', trigger: 'blur' }] },
+      checkAll: false,
+      checkedResources: [],
+      resourceOptions: [],
+      resourceIds: [],
+      isIndeterminate: false
     }
   },
   created() {
     this.getList()
     this.getTreeList()
+    this.getResourceList()
   },
   methods: {
     getList() {
@@ -174,6 +191,18 @@ export default {
         this.list = res.data.list
         this.total = res.data.total
         this.listLoading = false
+      })
+    },
+    getResourceList() {
+      fetchList().then(res => {
+        this.resourceOptions = res.data
+        res.data.forEach(el => this.resourceIds.push(el.id))
+      })
+    },
+    getRoleResource(id) {
+      fetchRoleResource({ roleId: id }).then(res => {
+        res.data.forEach(el => this.checkedResources.push(el.id))
+        this.resourceLoading = false
       })
     },
     handleSearch() {
@@ -191,7 +220,13 @@ export default {
       this.roleId = id
       this.getRoleMenu(id)
     },
-    handleAllocResource(id) {},
+    handleAllocResource(id) {
+      this.resourceDialogVisible = true
+      this.resourceLoading = true
+      this.roleId = id
+      this.checkedResources = []
+      this.getRoleResource(id)
+    },
     handleUpdate(role) {
       this.dialogVisible = true
       this.isEdit = true
@@ -262,18 +297,39 @@ export default {
         params.append('roleId', this.roleId)
         params.append('menuIds', Array.from(checkedMenuIds))
         allocMenu(params).then(res => {
-          this.$message({
-            message: '分配成功',
-            type: 'success',
-            duration: 1000
-          })
+          this.$message.success('菜单分配成功')
           this.menuDialogVisible = false
         })
       })
     },
     handleMenuClear() {
       this.$refs.tree.setCheckedKeys([])
-    }
+    },
+    handleCheckAllChange(val) {
+      this.checkedResources = val ? this.resourceIds : []
+      this.isIndeterminate = false
+    },
+    handleCheckedResourcesChange(value) {
+      const checkedCount = value.length
+      this.checkAll = checkedCount === this.resourceOptions.length
+      this.isIndeterminate = checkedCount > 0 && checkedCount < this.resourceOptions.length
+    },
+    handleResourceSave() {
+      this.$confirm('是否分配资源？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        const params = new URLSearchParams()
+        params.append('roleId', this.roleId)
+        params.append('resourceIds', this.checkedResources)
+        allocResource(params).then(() => {
+          this.$message.success('资源分配成功')
+          this.resourceDialogVisible = false
+        })
+      })
+    },
+    handleResourceClear() {}
   }
 }
 </script>

@@ -46,3 +46,11 @@ export function fetchRoleMenu(data) {
     params: data
   })
 }
+
+export function fetchRoleResource(data) {
+  return request({
+    url: 'role/resourceList',
+    method: 'get',
+    params: data
+  })
+}

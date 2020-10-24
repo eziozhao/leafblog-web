@@ -168,7 +168,7 @@ export default {
       listLoading: true,
       listQuery: {
         pageNum: 1,
-        pageSize: 10,
+        pageSize: 5,
         keyword: null
       },
       dialogVisible: false,
