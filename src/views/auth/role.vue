@@ -2,7 +2,7 @@
   <div class="app-container">
     <el-row :gutter="20" style="margin-bottom: 10px">
       <el-col :span="6">
-        <el-input v-model="listQuery.keyword" placeholder="输入角色名搜索" />
+        <el-input v-model="listQuery.keyword" placeholder="输入角色名搜索" clearable />
       </el-col>
       <el-col :span="6">
         <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>

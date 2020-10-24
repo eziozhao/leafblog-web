@@ -1,5 +1,13 @@
 <template>
   <div class="app-container">
+    <el-row :gutter="20" style="margin-bottom: 10px">
+      <el-col :span="6">
+        <el-input v-model="listQuery.keyword" placeholder="输入标题搜索" clearable />
+      </el-col>
+      <el-col :span="6">
+        <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
+      </el-col>
+    </el-row>
     <el-table v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%">
       <el-table-column
         type="index"
@@ -107,6 +115,10 @@ export default {
         this.total = res.data.total
         this.listLoading = false
       })
+    },
+    handleSearch() {
+      this.listQuery.pageNum = 1
+      this.getList()
     },
     handleDelete(id) {
       const ids = []

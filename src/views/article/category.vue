@@ -2,7 +2,7 @@
   <div class="app-container">
     <el-row :gutter="20" style="margin-bottom: 10px">
       <el-col :span="6">
-        <el-input v-model="newCate" placeholder="输入新的分类名" />
+        <el-input v-model="newCate" placeholder="输入新的分类名" clearable/>
       </el-col>
       <el-col :span="6">
         <el-button type="primary" icon="el-icon-circle-plus-outline" @click="handleAdd">添加分类</el-button>

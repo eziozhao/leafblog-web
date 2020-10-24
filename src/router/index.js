@@ -71,7 +71,7 @@ export const asyncRoutes = [
       path: 'list',
       name: 'List',
       component: () => import('@/views/article/index'),
-      meta: { title: '文章列表', icon: 'product-list'}
+      meta: { title: '文章列表', icon: 'product-list' }
     },
     {
       path: 'publish',
@@ -133,6 +133,16 @@ export const asyncRoutes = [
         meta: { title: '资源管理', icon: 'product-list' }
       }
     ]
+  },
+  {
+    path: '/log',
+    component: Layout,
+    children: [{
+      path: 'list',
+      name: 'List',
+      component: () => import('@/views/log/index'),
+      meta: { title: '日志管理', icon: 'dashboard' }
+    }]
   },
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }

@@ -2,7 +2,7 @@
   <div class="app-container">
     <el-row :gutter="20" style="margin-bottom: 10px">
       <el-col :span="6">
-        <el-input v-model="listQuery.keyword" placeholder="输入关键字搜索" />
+        <el-input v-model="listQuery.keyword" placeholder="输入关键字搜索" clearable/>
       </el-col>
       <el-col :span="6">
         <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
@@ -26,7 +26,7 @@
           <span>{{ scope.row.url }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="描述" align="center">
+      <el-table-column label="描述" align="center" show-overflow-tooltip>
         <template slot-scope="scope">{{ scope.row.description }}</template>
       </el-table-column>
       <el-table-column align="center" label="创建时间">
@@ -77,7 +77,7 @@
         <el-form-item label="资源url：" prop="url">
           <el-input v-model="resource.url" style="width: 250px" />
         </el-form-item>
-        <el-form-item label="描述：" prop="description">
+        <el-form-item label="描述：" prop="description" >
           <el-input v-model="resource.description" type="textarea" :rows="5" style="width: 250px" />
         </el-form-item>
       </el-form>
