@@ -270,7 +270,7 @@ export default {
         const checkedMenuIds = []
         if (menuList != null && menuList.length > 0) {
           menuList.forEach(menu => {
-            menu.parentId !== 0 ? checkedMenuIds.push(menu.id) : ''
+            checkedMenuIds.push(menu.id)
           })
         }
         this.$refs.tree.setCheckedKeys(checkedMenuIds)

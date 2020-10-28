@@ -64,7 +64,7 @@ import { formatDate } from '@/utils'
 import { fetchList, deleteLogs } from '@/api/log'
 
 export default {
-  name: 'List',
+  name: 'LogList',
   components: { Pagination },
   filters: {
     formatCreateTime(time) {

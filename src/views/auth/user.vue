@@ -200,7 +200,7 @@ export default {
     },
     getRoles() {
       fetchRoleList().then(res => {
-        this.allRoleList = res.data
+        this.allRoleList = res.data.list
       })
     },
     fetchUserRole(id) {
