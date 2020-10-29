@@ -1,5 +1,13 @@
 <template>
   <div class="app-container">
+    <el-row :gutter="20" style="margin-bottom: 10px">
+      <el-col :span="6">
+        <el-input v-model="listQuery.keyword" placeholder="输入标题搜索" clearable />
+      </el-col>
+      <el-col :span="6">
+        <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
+      </el-col>
+    </el-row>
     <el-table v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%">
       <el-table-column
         type="index"
@@ -52,8 +60,8 @@
     <pagination
       v-show="total>0"
       :total="total"
-      :page.sync="listQuery.page"
-      :limit.sync="listQuery.limit"
+      :page.sync="listQuery.pageNum"
+      :limit.sync="listQuery.pageSize"
       @pagination="getList"
     />
   </div>
@@ -87,8 +95,8 @@ export default {
       listLoading: true,
       listQuery: {
         pageNum: 1,
-        pageSize: 10,
-        keywords: null
+        pageSize: 5,
+        keyword: null
       },
       stateMap: {
         0: '草稿',
@@ -108,6 +116,10 @@ export default {
         this.listLoading = false
       })
     },
+    handleSearch() {
+      this.listQuery.pageNum = 1
+      this.getList()
+    },
     handleDelete(id) {
       const ids = []
       ids.push(id)
@@ -116,6 +128,7 @@ export default {
       params.append('state', 2)
       deleteArticle(params).then(() => {
         this.$message.success('删除成功')
+        this.getList()
       })
     }
   }

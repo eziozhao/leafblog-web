@@ -29,7 +29,7 @@ const actions = {
   login({ commit }, userInfo) {
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
-      login( username, password ).then(response => {
+      login(username, password).then(response => {
         const data = response.data
         const tokenStr = data.tokenHead + data.token
         setToken(tokenStr)
@@ -41,7 +41,6 @@ const actions = {
     })
   },
 
-  // get user info
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
       getInfo().then(response => {
@@ -61,11 +60,10 @@ const actions = {
     })
   },
 
-  // user logout
   logout({ commit, state }) {
     return new Promise((resolve, reject) => {
       logout().then(() => {
-        removeToken() // must remove  token  first
+        removeToken()
         resetRouter()
         commit('RESET_STATE')
         resolve()
@@ -74,23 +72,14 @@ const actions = {
       })
     })
   },
-  // 前端 登出
   fedLogOut({ commit }) {
     return new Promise(resolve => {
       commit('SET_TOKEN', '')
       removeToken()
       resolve()
     })
-  },
-
-  // remove token
-  resetToken({ commit }) {
-    return new Promise(resolve => {
-      removeToken() // must remove  token  first
-      commit('RESET_STATE')
-      resolve()
-    })
   }
+
 }
 
 export default {

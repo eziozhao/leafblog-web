@@ -2,7 +2,7 @@
   <div class="app-container">
     <el-row :gutter="20" style="margin-bottom: 10px">
       <el-col :span="6">
-        <el-input v-model="newCate" placeholder="输入新的分类名" />
+        <el-input v-model="newCate" placeholder="输入新的分类名" clearable/>
       </el-col>
       <el-col :span="6">
         <el-button type="primary" icon="el-icon-circle-plus-outline" @click="handleAdd">添加分类</el-button>
@@ -100,14 +100,16 @@ export default {
       param.append('ids', ids)
       deleteCate(param).then(() => {
         this.$message.success('删除成功')
+        this.getList()
       })
     },
     handleUpdate() {
       this.$refs['cateForm'].validate((valid) => {
         if (valid) {
-          this.dialogFormVisible = false
           update({ id: this.updateId, name: this.form.name }).then(() => {
+            this.dialogFormVisible = false
             this.$message.success('分类更新成功')
+            this.getList()
           })
         } else {
           return false
@@ -117,6 +119,7 @@ export default {
     handleAdd() {
       add({ name: this.newCate }).then(() => {
         this.$message.success('分类添加成功')
+        this.getList()
       })
     }
   }

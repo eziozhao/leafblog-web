@@ -2,7 +2,7 @@
   <div class="createPost-container">
     <el-form ref="postForm" :model="postForm" :rules="rules" class="form-container">
       <sticky :z-index="10" :class-name="'sub-navbar '+postForm.status">
-        <el-row v-if="articleId===null">
+        <el-row v-if="!articleId">
           <el-button v-loading="loading" style="margin-left: 10px;" type="success" @click="submitForm">
             发表
           </el-button>

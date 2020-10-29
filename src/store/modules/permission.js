@@ -20,12 +20,8 @@ function hasPermission(menus, route) {
       if (currMenu.hidden != null) {
         route.hidden = currMenu.hidden !== 0
       }
-      if (currMenu.sort != null && currMenu.sort !== '') {
-        route.sort = currMenu.sort
-      }
       return true
     } else {
-      route.sort = 0
       if (route.hidden !== undefined && route.hidden === true) {
         return true
       } else {
