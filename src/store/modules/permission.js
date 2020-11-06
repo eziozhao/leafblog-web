@@ -10,13 +10,6 @@ function hasPermission(menus, route) {
   if (route.name) {
     const currMenu = getMenu(route.name, menus)
     if (currMenu != null) {
-      // 设置菜单的标题、图标和可见性
-      if (currMenu.title != null && currMenu.title !== '') {
-        route.meta.title = currMenu.title
-      }
-      if (currMenu.icon != null && currMenu.title !== '') {
-        route.meta.icon = currMenu.icon
-      }
       if (currMenu.hidden != null) {
         route.hidden = currMenu.hidden !== 0
       }
@@ -65,6 +58,9 @@ const actions = {
         if (username === 'admin') return true
         if (hasPermission(menus, v)) {
           if (v.children && v.children.length > 0) {
+            if (v.children.length === 1) {
+              return v
+            }
             v.children = v.children.filter(child => {
               if (hasPermission(menus, child)) {
                 return child
