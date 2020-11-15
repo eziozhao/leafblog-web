@@ -17,14 +17,12 @@
 
 ## 使用方式
 
-1. 克隆项目到本地
-2. 通过leafblog.sql在本地建立数据库
-3. 将项目中的application.yml和generator.properties等配置文件中信息修改为你自己的信息
-4. 启动运行后台
+1. `git clone https://github.com/eziozhao/leafblog-web.git`
+2. 在当前目录运行`npm run dev`
+3. 浏览器中访问 `http://localhost:9528/`
 
-至此，后台项目已经成功运行，可通过postman调试接口。
 
-如果有需要，可以将前端项目也克隆到本地，使用 `npm run dev` 运行后，在浏览器中访问 `http://localhost:9528/` 即可。
+如果想查看完整效果，可以将后台项目也克隆到本地，详细使用见[后台项目地址](https://github.com/eziozhao/leafblog-end)
 
 ## 基本技术
 
